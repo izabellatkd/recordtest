@@ -21,12 +21,32 @@
     position: relative;
   }
 
-  #trackTitle {
+  /* --- Now Playing --- */
+  .now-playing {
     text-align: center;
-    font-size: 16px;
-    font-weight: bold;
     margin-bottom: 10px;
-    color: #333333;
+  }
+
+  .now-playing span {
+    display: block;
+    font-size: 12px;
+    color: #48E9DA; /* pastel aqua */
+    margin-bottom: 4px;
+  }
+
+  #trackTitle {
+    font-size: 18px;
+    font-weight: bold;
+    background: linear-gradient(90deg, #FFB6C1, #A7F3D0, #FFD6A5, #C9B6FF, #FFB6C1);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 6s infinite linear;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
   }
 
   /* --- Controls --- */
@@ -157,7 +177,11 @@
 <body>
 
 <div class="player-popup">
-  <div id="trackTitle">Loading...</div>
+  <!-- Now Playing -->
+  <div class="now-playing">
+    <span>Now Playing:</span>
+    <div id="trackTitle">Loading...</div>
+  </div>
 
   <div class="controls">
     <button id="prevBtn">⏮</button>
