@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Poolsuite-Style Player</title>
+  <title>Poolsuite-Inspired Player</title>
   <style>
     body {
       background: linear-gradient(135deg, #87ceeb, #ffb6c1);
@@ -15,101 +15,161 @@
       margin: 0;
     }
 
-    .player {
+    .window {
       background: #fefefe;
       border: 3px solid #000;
-      padding: 20px;
-      width: 350px;
-      text-align: center;
-      box-shadow: 5px 5px 0px #000;
+      box-shadow: 6px 6px 0px #000;
+      width: 400px;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
     }
 
-    h1 {
-      font-size: 18px;
-      margin-bottom: 15px;
+    .titlebar {
+      background: #000;
+      color: #fff;
+      padding: 5px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
     }
 
-    .record {
-      width: 150px;
-      height: 150px;
-      margin: 0 auto 15px auto;
-      border-radius: 50%;
-      background: radial-gradient(circle, #000 60%, #222 100%);
-      border: 6px solid #111;
-      animation: spin 4s linear infinite;
-      animation-play-state: paused;
+    .screen {
+      background: #222;
+      color: #fff;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      position: relative;
     }
 
-    .record::before {
-      content: '';
-      position: absolute;
-      width: 40px;
-      height: 40px;
-      background: #ff69b4;
-      border-radius: 50%;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+    .screen video, 
+    .screen img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
-    @keyframes spin {
-      100% { transform: rotate(360deg); }
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+      background: #ddd;
     }
 
-    button {
-      padding: 8px 16px;
-      margin: 5px;
+    .controls button {
       background: #000;
       color: #fff;
       border: none;
+      padding: 8px 14px;
+      margin: 0 5px;
+      font-family: monospace;
       cursor: pointer;
     }
 
-    ul {
-      list-style: none;
-      padding: 0;
-      margin-top: 15px;
-      max-height: 100px;
-      overflow-y: auto;
-      font-size: 14px;
-      text-align: left;
+    .progress-container {
+      display: flex;
+      align-items: center;
+      padding: 5px 10px;
+      background: #eee;
     }
 
-    li {
+    .progress {
+      flex: 1;
+      margin: 0 10px;
+    }
+
+    .playlist {
+      list-style: none;
+      margin: 0;
+      padding: 10px;
+      background: #fafafa;
+      max-height: 120px;
+      overflow-y: auto;
+      font-size: 14px;
+    }
+
+    .playlist li {
       padding: 6px;
       cursor: pointer;
     }
 
-    li:hover {
+    .playlist li:hover {
+      background: #ddd;
+    }
+
+    .playlist li.active {
+      background: #ff69b4;
+      color: #fff;
+    }
+
+    .volume-container {
+      display: flex;
+      align-items: center;
+      padding: 5px 10px;
       background: #eee;
     }
 
-    li.active {
-      background: #ff69b4;
-      color: #fff;
+    .volume-container label {
+      margin-right: 10px;
+      font-size: 12px;
     }
   </style>
 </head>
 <body>
-  <div class="player">
-    <h1>🌴 Poolsuite Clone 🌴</h1>
-    <div class="record" id="record"></div>
-    <button id="playBtn">Play/Pause</button>
-    <ul id="playlist"></ul>
+  <div class="window">
+    <div class="titlebar">
+      <span>Poolsuite Player</span>
+      <span>▢ ✖</span>
+    </div>
+
+    <div class="screen" id="screen">
+      <img src="cover.jpg" alt="Album Art">
+    </div>
+
+    <div class="controls">
+      <button id="prevBtn">⏮</button>
+      <button id="playBtn">▶</button>
+      <button id="nextBtn">⏭</button>
+    </div>
+
+    <div class="progress-container">
+      <span id="currentTime">0:00</span>
+      <input type="range" id="progress" class="progress" value="0" min="0" max="100">
+      <span id="duration">0:00</span>
+    </div>
+
+    <div class="volume-container">
+      <label for="volume">🔊 Volume</label>
+      <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
+    </div>
+
+    <ul class="playlist" id="playlist"></ul>
+
     <audio id="audio"></audio>
   </div>
 
   <script>
-    const record = document.getElementById('record');
-    const playBtn = document.getElementById('playBtn');
-    const playlist = document.getElementById('playlist');
     const audio = document.getElementById('audio');
+    const playBtn = document.getElementById('playBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const progress = document.getElementById('progress');
+    const currentTimeEl = document.getElementById('currentTime');
+    const durationEl = document.getElementById('duration');
+    const volume = document.getElementById('volume');
+    const playlist = document.getElementById('playlist');
+    const screen = document.getElementById('screen');
 
-    // 🎵 Your custom music goes here:
+    // 🎵 Replace with your own songs + optional cover art/video
     const tracks = [
-      { name: "Sunset Drive", url: "music/song1.mp3" },
-      { name: "Beach Vibes", url: "music/song2.mp3" },
-      { name: "Late Night Pool", url: "music/song3.mp3" }
+      { name: "Sunset Drive", url: "music/song1.mp3", cover: "covers/cover1.jpg" },
+      { name: "Beach Vibes", url: "music/song2.mp3", cover: "covers/cover2.jpg" },
+      { name: "Late Night Pool", url: "music/song3.mp3", cover: "covers/cover3.jpg" }
     ];
 
     let currentIndex = 0;
@@ -129,37 +189,64 @@
     function loadTrack(index) {
       currentIndex = index;
       audio.src = tracks[index].url;
+      screen.innerHTML = `<img src="${tracks[index].cover}" alt="Cover">`;
       audio.play();
       isPlaying = true;
-      record.style.animationPlayState = 'running';
-      playBtn.textContent = "Pause";
+      playBtn.textContent = "⏸";
       renderPlaylist();
     }
 
-    playBtn.onclick = () => {
-      if (!isPlaying) {
-        audio.play();
-        record.style.animationPlayState = 'running';
-        playBtn.textContent = "Pause";
-        isPlaying = true;
-      } else {
+    function togglePlay() {
+      if (isPlaying) {
         audio.pause();
-        record.style.animationPlayState = 'paused';
-        playBtn.textContent = "Play";
-        isPlaying = false;
-      }
-    };
-
-    audio.onended = () => {
-      if (currentIndex < tracks.length - 1) {
-        loadTrack(currentIndex + 1);
+        playBtn.textContent = "▶";
       } else {
-        record.style.animationPlayState = 'paused';
-        playBtn.textContent = "Play";
-        isPlaying = false;
+        audio.play();
+        playBtn.textContent = "⏸";
       }
-    };
+      isPlaying = !isPlaying;
+    }
 
+    function prevTrack() {
+      currentIndex = (currentIndex - 1 + tracks.length) % tracks.length;
+      loadTrack(currentIndex);
+    }
+
+    function nextTrack() {
+      currentIndex = (currentIndex + 1) % tracks.length;
+      loadTrack(currentIndex);
+    }
+
+    function updateProgress() {
+      if (audio.duration) {
+        progress.value = (audio.currentTime / audio.duration) * 100;
+        currentTimeEl.textContent = formatTime(audio.currentTime);
+        durationEl.textContent = formatTime(audio.duration);
+      }
+    }
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    progress.addEventListener('input', () => {
+      audio.currentTime = (progress.value / 100) * audio.duration;
+    });
+
+    volume.addEventListener('input', () => {
+      audio.volume = volume.value;
+    });
+
+    audio.addEventListener('timeupdate', updateProgress);
+    audio.addEventListener('ended', nextTrack);
+
+    playBtn.addEventListener('click', togglePlay);
+    prevBtn.addEventListener('click', prevTrack);
+    nextBtn.addEventListener('click', nextTrack);
+
+    // Initialize
     renderPlaylist();
     loadTrack(0);
   </script>
