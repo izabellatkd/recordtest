@@ -1,327 +1,358 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vaporwave Player</title>
-<style>
-  body {
-    background: #FFFFFF; /* blends into Notion */
-    font-family: 'Courier New', monospace;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poolsuite-Inspired Player</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #87ceeb, #ffb6c1);
+      font-family: "Courier New", monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
 
-  /* --- Player Popup --- */
-  .player-popup {
-    background: #F3E8FF; /* pastel lavender */
-    border: 2px solid #D3D3D3;
-    border-radius: 10px;
-    padding: 20px;
-    width: 320px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-    position: relative;
-  }
+    .window {
+      background: #fefefe;
+      border: 3px solid #000;
+      box-shadow: 6px 6px 0px #000;
+      width: 420px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
 
-  /* --- Now Playing --- */
-  .now-playing {
-    text-align: center;
-    margin-bottom: 10px;
-  }
+    .titlebar {
+      background: #000;
+      color: #fff;
+      padding: 5px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
 
-  .now-playing span {
-    display: block;
-    font-size: 12px;
-    color: #48E9DA; /* pastel aqua */
-    margin-bottom: 4px;
-  }
+    .screen {
+      background: #222;
+      color: #fff;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      position: relative;
+    }
 
-  #trackTitle {
-    font-size: 18px;
-    font-weight: bold;
-    background: linear-gradient(90deg, #FFB6C1, #A7F3D0, #FFD6A5, #C9B6FF, #FFB6C1);
-    background-size: 300% 100%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: shimmer 6s infinite linear;
-  }
+    .screen video, 
+    .screen img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-  @keyframes shimmer {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 100% 50%; }
-  }
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+      background: #ddd;
+    }
 
-  /* --- Controls --- */
-  .controls {
-    display: flex;
-    justify-content: center;
-    margin: 10px 0;
-  }
+    .controls button {
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      margin: 0 5px;
+      font-family: monospace;
+      cursor: pointer;
+    }
 
-  .controls button {
-    background: #FFB6C1; /* pastel pink */
-    border: 1px solid #D3D3D3;
-    color: #333333;
-    border-radius: 6px;
-    padding: 8px 12px;
-    margin: 4px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
+    .track-title {
+      text-align: center;
+      font-size: 14px;
+      padding: 6px;
+      background: #fafafa;
+      border-top: 1px solid #ccc;
+      border-bottom: 1px solid #ccc;
+    }
 
-  .controls button:hover {
-    background: #A7F3D0; /* pastel aqua hover */
-  }
+    .progress-container {
+      display: flex;
+      align-items: center;
+      padding: 5px 10px;
+      background: #eee;
+      gap: 8px;
+    }
 
-  /* --- Scrubber --- */
-  .progress-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 10px 0;
-    color: #333333;
-  }
+    .progress {
+      flex: 1;
+    }
 
-  .progress, .volume {
-    flex-grow: 1;
-    accent-color: #FFB6C1;
-  }
+    /* Waveform */
+    .waveform {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      height: 40px;
+      background: #fafafa;
+      border-bottom: 1px solid #ccc;
+      padding: 4px 0;
+    }
 
-  /* --- Waveform --- */
-  .waveform {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    height: 40px;
-    background: #F3E8FF;
-    padding: 5px 0;
-    border-bottom: 2px solid #D3D3D3;
-    margin-bottom: 10px;
-  }
+    .bar {
+      width: 4px;
+      margin: 0 2px;
+      background: #ff69b4;
+      height: 10px;
+      animation: bounce 1s infinite ease-in-out;
+      animation-play-state: paused;
+    }
 
-  .bar {
-    width: 4px;
-    margin: 0 2px;
-    background: #FFB6C1;
-    height: 10px;
-    animation: bounce 1s infinite ease-in-out;
-    animation-play-state: paused;
-    border-radius: 2px;
-  }
+    .bar:nth-child(2n) { background: #87ceeb; }
+    .bar:nth-child(3n) { background: #90ee90; }
+    .bar:nth-child(5n) { background: #ffd700; }
 
-  .bar:nth-child(2n) { background: #A7F3D0; }
-  .bar:nth-child(3n) { background: #FFD6A5; }
-  .bar:nth-child(5n) { background: #C9B6FF; }
-  .bar:nth-child(7n) { background: #FFB6C1; }
+    @keyframes bounce {
+      0%, 100% { height: 10px; }
+      50% { height: 30px; }
+    }
 
-  @keyframes bounce {
-    0%, 100% { height: 10px; }
-    50% { height: 30px; }
-  }
+    .volume-container {
+      display: flex;
+      align-items: center;
+      padding: 5px 10px;
+      background: #eee;
+    }
 
-  /* --- Playlist Popup --- */
-  .playlist-popup {
-    position: absolute;
-    top: 20px;
-    right: -350px;
-    width: 280px;
-    max-height: 400px;
-    overflow-y: auto;
-    background: #F3E8FF; /* lavender */
-    border: 2px solid #48E9DA; /* neon aqua */
-    border-radius: 10px;
-    box-shadow: 0 6px 20px rgba(72,233,218,0.5);
-    padding: 12px;
-    display: none;
-    z-index: 999;
-  }
+    /* Playlist Popup */
+    .playlist-popup {
+      display: none;
+      position: absolute;
+      top: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 280px;
+      max-height: 200px;
+      overflow-y: auto;
+      border: 2px solid #000;
+      background: #fff;
+      box-shadow: 5px 5px 0px #000;
+      z-index: 100;
+    }
 
-  .playlist-popup.active {
-    display: block;
-    animation: slideIn 0.3s ease forwards;
-  }
+    .playlist-popup ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      font-size: 14px;
+    }
 
-  .playlist-popup h3 {
-    margin-top: 0;
-    font-size: 16px;
-    color: #333333;
-    text-align: center;
-    border-bottom: 1px solid #48E9DA;
-    padding-bottom: 6px;
-  }
+    .playlist-popup li {
+      padding: 6px 10px;
+      cursor: pointer;
+    }
 
-  .playlist-popup ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
+    .playlist-popup li:hover {
+      background: #ddd;
+    }
 
-  .playlist-popup li {
-    padding: 8px;
-    cursor: pointer;
-    border-radius: 6px;
-    transition: background 0.2s;
-    color: #333333;
-  }
-
-  .playlist-popup li:hover {
-    background: #FFB6C1;
-    color: #333333;
-  }
-
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateX(20px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-</style>
+    .playlist-popup li.active {
+      background: #ff69b4;
+      color: #fff;
+    }
+  </style>
 </head>
 <body>
+  <div class="window">
+    <div class="titlebar">
+      <span>Poolsuite Player</span>
+      <span>▢ ✖</span>
+    </div>
 
-<div class="player-popup">
-  <!-- Now Playing -->
-  <div class="now-playing">
-    <span>Now Playing:</span>
-    <div id="trackTitle">Loading...</div>
+    <div class="screen" id="screen">
+      <img src="covers/cover1.jpg" alt="Album Art">
+    </div>
+
+    <div class="controls">
+      <button id="prevBtn">⏮</button>
+      <button id="playBtn">▶</button>
+      <button id="nextBtn">⏭</button>
+      <button id="videoBtn">📺</button>
+      <button id="playlistToggle">🎶</button>
+    </div>
+
+    <div class="track-title" id="trackTitle">Loading...</div>
+
+    <div class="progress-container">
+      <span id="currentTime">0:00</span>
+      <input type="range" id="progress" class="progress" value="0" min="0" max="100">
+      <span id="duration">0:00</span>
+    </div>
+
+    <!-- Waveform animation -->
+    <div class="waveform" id="waveform">
+      <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+      <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+      <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+      <div class="bar"></div>
+    </div>
+
+    <div class="volume-container">
+      <label for="volume">🔊</label>
+      <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
+    </div>
+
+    <!-- Hidden Playlist Popup -->
+    <div class="playlist-popup" id="playlistPopup">
+      <ul id="playlist"></ul>
+    </div>
+
+    <audio id="audio"></audio>
   </div>
 
-  <div class="controls">
-    <button id="prevBtn">⏮</button>
-    <button id="playBtn">▶</button>
-    <button id="nextBtn">⏭</button>
-    <button id="playlistToggle">📂</button>
-  </div>
+  <script>
+    const audio = document.getElementById('audio');
+    const playBtn = document.getElementById('playBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const videoBtn = document.getElementById('videoBtn');
+    const playlistToggle = document.getElementById('playlistToggle');
+    const playlistPopup = document.getElementById('playlistPopup');
+    const playlist = document.getElementById('playlist');
+    const progress = document.getElementById('progress');
+    const currentTimeEl = document.getElementById('currentTime');
+    const durationEl = document.getElementById('duration');
+    const volume = document.getElementById('volume');
+    const screen = document.getElementById('screen');
+    const trackTitle = document.getElementById('trackTitle');
+    const bars = document.querySelectorAll('.bar');
 
-  <div class="progress-container">
-    <span id="currentTime">0:00</span>
-    <input type="range" id="progress" class="progress" value="0" min="0" max="100">
-    <span id="duration">0:00</span>
-  </div>
+    // 🎵 Playlist of songs
+    const tracks = [
+      { name: "Sunset Drive", url: "music/song1.mp3", cover: "covers/cover1.jpg" },
+      { name: "Beach Vibes", url: "music/song2.mp3", cover: "covers/cover2.jpg" },
+      { name: "Late Night Pool", url: "music/song3.mp3", cover: "covers/cover3.jpg" },
+      { name: "Neon Nights", url: "music/song4.mp3", cover: "covers/cover4.jpg" }
+    ];
 
-  <!-- Waveform -->
-  <div class="waveform" id="waveform">
-    <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
-    <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
-  </div>
+    // 🎞️ Background video options
+    const videos = [
+      "videos/retro1.mp4",
+      "videos/retro2.mp4",
+      "videos/retro3.mp4"
+    ];
+    let currentVideoIndex = 0;
 
-  <!-- Volume -->
-  <input type="range" id="volume" class="volume" min="0" max="1" step="0.01" value="1">
+    let currentIndex = 0;
+    let isPlaying = false;
 
-  <!-- Playlist Popup -->
-  <div class="playlist-popup" id="playlistPopup">
-    <h3>Playlist</h3>
-    <ul id="playlist"></ul>
-  </div>
-</div>
+    function renderPlaylist() {
+      playlist.innerHTML = '';
+      tracks.forEach((track, i) => {
+        const li = document.createElement('li');
+        li.textContent = track.name;
+        if (i === currentIndex) li.classList.add('active');
+        li.onclick = () => {
+          loadTrack(i);
+          togglePlaylist(false);
+        };
+        playlist.appendChild(li);
+      });
+    }
 
-<audio id="audio"></audio>
-
-<script>
-  const tracks = [
-    { name: "Vaporwave Dream", url: "song1.mp3" },
-    { name: "Neon Sunset", url: "song2.mp3" },
-    { name: "Mallsoft Memories", url: "song3.mp3" },
-    { name: "Pastel Nights", url: "song4.mp3" }
-  ];
-
-  let currentIndex = 0;
-  let isPlaying = false;
-
-  const audio = document.getElementById("audio");
-  const playBtn = document.getElementById("playBtn");
-  const prevBtn = document.getElementById("prevBtn");
-  const nextBtn = document.getElementById("nextBtn");
-  const progress = document.getElementById("progress");
-  const currentTimeEl = document.getElementById("currentTime");
-  const durationEl = document.getElementById("duration");
-  const volume = document.getElementById("volume");
-  const trackTitle = document.getElementById("trackTitle");
-  const bars = document.querySelectorAll(".bar");
-  const playlistEl = document.getElementById("playlist");
-  const playlistPopup = document.getElementById("playlistPopup");
-  const playlistToggle = document.getElementById("playlistToggle");
-
-  function setWaveform(state) {
-    bars.forEach(bar => bar.style.animationPlayState = state ? "running" : "paused");
-  }
-
-  function loadTrack(index) {
-    currentIndex = index;
-    audio.src = tracks[index].url;
-    trackTitle.textContent = tracks[index].name;
-    audio.play();
-    isPlaying = true;
-    playBtn.textContent = "⏸";
-    setWaveform(true);
-  }
-
-  function togglePlay() {
-    if (isPlaying) {
-      audio.pause();
-      playBtn.textContent = "▶";
-      setWaveform(false);
-    } else {
+    function loadTrack(index) {
+      currentIndex = index;
+      audio.src = tracks[index].url;
+      trackTitle.textContent = tracks[index].name;
+      screen.innerHTML = `<img src="${tracks[index].cover}" alt="Cover">`;
       audio.play();
+      isPlaying = true;
       playBtn.textContent = "⏸";
       setWaveform(true);
+      renderPlaylist();
     }
-    isPlaying = !isPlaying;
-  }
 
-  function prevTrack() {
-    loadTrack((currentIndex - 1 + tracks.length) % tracks.length);
-  }
+    function togglePlay() {
+      if (isPlaying) {
+        audio.pause();
+        playBtn.textContent = "▶";
+        setWaveform(false);
+      } else {
+        audio.play();
+        playBtn.textContent = "⏸";
+        setWaveform(true);
+      }
+      isPlaying = !isPlaying;
+    }
 
-  function nextTrack() {
-    loadTrack((currentIndex + 1) % tracks.length);
-  }
+    function prevTrack() {
+      currentIndex = (currentIndex - 1 + tracks.length) % tracks.length;
+      loadTrack(currentIndex);
+    }
 
-  audio.addEventListener("timeupdate", () => {
-    progress.value = (audio.currentTime / audio.duration) * 100 || 0;
-    currentTimeEl.textContent = formatTime(audio.currentTime);
-    durationEl.textContent = formatTime(audio.duration);
-  });
+    function nextTrack() {
+      currentIndex = (currentIndex + 1) % tracks.length;
+      loadTrack(currentIndex);
+    }
 
-  progress.addEventListener("input", () => {
-    audio.currentTime = (progress.value / 100) * audio.duration;
-  });
+    function changeVideo() {
+      currentVideoIndex = (currentVideoIndex + 1) % videos.length;
+      screen.innerHTML = `
+        <video src="${videos[currentVideoIndex]}" autoplay loop muted></video>
+      `;
+    }
 
-  volume.addEventListener("input", () => {
-    audio.volume = volume.value;
-  });
+    function updateProgress() {
+      if (audio.duration) {
+        progress.value = (audio.currentTime / audio.duration) * 100;
+        currentTimeEl.textContent = formatTime(audio.currentTime);
+        durationEl.textContent = formatTime(audio.duration);
+      }
+    }
 
-  audio.addEventListener("ended", nextTrack);
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
 
-  playBtn.addEventListener("click", togglePlay);
-  prevBtn.addEventListener("click", prevTrack);
-  nextBtn.addEventListener("click", nextTrack);
+    function setWaveform(state) {
+      bars.forEach(bar => bar.style.animationPlayState = state ? "running" : "paused");
+    }
 
-  playlistToggle.addEventListener("click", () => {
-    playlistPopup.classList.toggle("active");
-  });
-
-  function renderPlaylist() {
-    playlistEl.innerHTML = "";
-    tracks.forEach((track, index) => {
-      const li = document.createElement("li");
-      li.textContent = track.name;
-      li.onclick = () => {
-        loadTrack(index);
-        playlistPopup.classList.remove("active");
-      };
-      playlistEl.appendChild(li);
+    progress.addEventListener('input', () => {
+      audio.currentTime = (progress.value / 100) * audio.duration;
     });
-  }
 
-  function formatTime(seconds) {
-    if (isNaN(seconds)) return "0:00";
-    const minutes = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
-  }
+    volume.addEventListener('input', () => {
+      audio.volume = volume.value;
+    });
 
-  // Init
-  renderPlaylist();
-  loadTrack(0);
-</script>
+    audio.addEventListener('timeupdate', updateProgress);
+    audio.addEventListener('ended', nextTrack);
 
+    playBtn.addEventListener('click', togglePlay);
+    prevBtn.addEventListener('click', prevTrack);
+    nextBtn.addEventListener('click', nextTrack);
+    videoBtn.addEventListener('click', changeVideo);
+    playlistToggle.addEventListener('click', () => togglePlaylist());
+
+    function togglePlaylist(forceClose = null) {
+      if (forceClose === false) {
+        playlistPopup.style.display = "none";
+      } else {
+        playlistPopup.style.display = playlistPopup.style.display === "block" ? "none" : "block";
+      }
+    }
+
+    // Initialize
+    renderPlaylist();
+    loadTrack(0);
+    changeVideo(); // start with first video
+  </script>
 </body>
 </html>
