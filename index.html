@@ -1,347 +1,336 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MP3 Player</title>
-  <style>
-    body {
-      background: #fff;
-      font-family: "Courier New", monospace;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MP3 Player</title>
+<style>
+body {
+  background: #fff;
+  font-family: "Courier New", monospace;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
 
-    .window {
-      background: #f9f0e9;
-      border: 3px solid #ccc;
-      box-shadow: 6px 6px 0px #a2c6c8;
-      width: 420px;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
+.window {
+  background: #f9f0e9;
+  border: 3px solid #ccc;
+  box-shadow: 6px 6px 0px #a2c6c8;
+  width: 420px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
 
-    .titlebar {
-      background: #b8e1e4;
-      color: #333;
-      padding: 5px 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 14px;
-      cursor: move;
-    }
+.titlebar {
+  background: #b8e1e4;
+  color: #333;
+  padding: 5px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  cursor: move;
+}
 
-    .titlebar span:first-child {
-      font-weight: bold;
-    }
+.titlebar span:first-child {
+  font-weight: bold;
+}
 
-    .screen {
-      background: #222;
-      color: #fff;
-      height: 200px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      position: relative;
-      overflow: hidden;
-    }
+.screen {
+  background: #222;
+  color: #fff;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
 
-    .screen video, 
-    .screen img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+.screen video, 
+.screen img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-    .controls {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 10px;
-      background: #f9f0e9;
-    }
+.controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  background: #f9f0e9;
+}
 
-    .controls button {
-      background: #f9f0e9;
-      color: #333;
-      border: 2px solid #ccc;
-      padding: 8px 14px;
-      margin: 0 5px;
-      font-family: monospace;
-      cursor: pointer;
-    }
+.controls button {
+  background: #f9f0e9;
+  color: #333;
+  border: 2px solid #ccc;
+  padding: 8px 14px;
+  margin: 0 5px;
+  font-family: monospace;
+  cursor: pointer;
+}
 
-    #playBtn {
-      background: #b8e1e4;
-    }
+#playBtn {
+  background: #b8e1e4;
+}
 
-    .track-title {
-      text-align: center;
-      font-size: 14px;
-      padding: 6px;
-      background: #fff;
-      border-top: 1px solid #ccc;
-      border-bottom: 1px solid #ccc;
-    }
+.track-title {
+  text-align: center;
+  font-size: 14px;
+  padding: 6px;
+  background: #fff;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
 
-    .progress-container,
-    .volume-container {
-      display: flex;
-      align-items: center;
-      padding: 5px 10px;
-      background: #f9f0e9;
-    }
+.progress-container,
+.volume-container {
+  display: flex;
+  align-items: center;
+  padding: 5px 10px;
+  background: #f9f0e9;
+}
 
-    .progress, #volume {
-      flex: 1;
-      margin: 0 10px;
-      accent-color: #7B7B7B;
-    }
+.progress, #volume {
+  flex: 1;
+  margin: 0 10px;
+  accent-color: #7B7B7B;
+}
 
-    #volume {
-      width: 80px;
-      margin-left: 0;
-    }
+#volume {
+  width: 80px;
+  margin-left: 0;
+}
 
-    /* Playlist Popup */
-    .playlist-popup {
-      display: none;
-      position: absolute;
-      top: 50px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 280px;
-      max-height: 200px;
-      overflow-y: auto;
-      border: 2px solid #ccc;
-      background: #f9f0e9;
-      box-shadow: 5px 5px 0px #a2c6c8;
-      z-index: 100;
-    }
+/* Playlist Popup */
+.playlist-popup {
+  display: none;
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 280px;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 2px solid #ccc;
+  background: #f9f0e9;
+  box-shadow: 5px 5px 0px #a2c6c8;
+  z-index: 100;
+}
 
-    .playlist-popup ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      font-size: 14px;
-    }
+.playlist-popup ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+}
 
-    .playlist-popup li {
-      padding: 6px 10px;
-      cursor: pointer;
-    }
+.playlist-popup li {
+  padding: 6px 10px;
+  cursor: pointer;
+}
 
-    .playlist-popup li:hover {
-      background: #ddd;
-    }
+.playlist-popup li:hover {
+  background: #ddd;
+}
 
-    .playlist-popup li.active {
-      background: #b8e1e4;
-      color: #333;
-    }
+.playlist-popup li.active {
+  background: #b8e1e4;
+  color: #333;
+}
 
-    /* Waveform */
-    .waveform {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      height: 50px;
-      margin: 5px 10px;
-    }
+/* Waveform */
+.waveform {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 50px;
+  margin: 5px 10px;
+}
 
-    .bar {
-      width: 4%;
-      background: #7B7B7B;
-      animation: wave 1.2s infinite;
-    }
+.bar {
+  width: 4%;
+  background: #7B7B7B;
+  animation: wave 1.2s infinite;
+}
 
-    .bar:nth-child(odd) { animation-delay: 0.2s; }
-    .bar:nth-child(even) { animation-delay: 0.4s; }
+.bar:nth-child(odd) { animation-delay: 0.2s; }
+.bar:nth-child(even) { animation-delay: 0.4s; }
 
-    @keyframes wave {
-      0%, 100% { height: 10%; }
-      50% { height: 100%; }
-    }
-  </style>
+@keyframes wave {
+  0%, 100% { height: 10%; }
+  50% { height: 100%; }
+}
+</style>
 </head>
 <body>
-  <div class="window" id="playerWindow">
-    <div class="titlebar" id="titlebar">
-      <span>MP3 Player</span>
-      <span id="closeBtn">✖</span>
-    </div>
 
-    <div class="screen" id="screen">
-      <img src="https://via.placeholder.com/420x200.png?text=Cover" alt="Album Art">
-    </div>
-
-    <div class="controls">
-      <button id="prevBtn">⏮</button>
-      <button id="playBtn">▶</button>
-      <button id="nextBtn">⏭</button>
-      <button id="videoBtn">📺</button>
-      <button id="playlistToggle">🎶</button>
-    </div>
-
-    <div class="track-title" id="trackTitle">Loading...</div>
-
-    <div class="progress-container">
-      <span id="currentTime">0:00</span>
-      <input type="range" id="progress" class="progress" value="0" min="0" max="100">
-      <span id="duration">0:00</span>
-    </div>
-
-    <div class="volume-container">
-      <label for="volume">🔊</label>
-      <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
-    </div>
-
-    <div class="waveform" id="waveform">
-      <!-- 21 bars -->
-      ${Array(21).fill('<div class="bar"></div>').join('')}
-    </div>
-
-    <div class="playlist-popup" id="playlistPopup">
-      <ul id="playlist"></ul>
-    </div>
-
-    <audio id="audio"></audio>
+<div class="window" id="playerWindow">
+  <div class="titlebar" id="titlebar">
+    <span>MP3 Player</span>
+    <span id="closeBtn">✖</span>
   </div>
 
-  <script>
-    const audio = document.getElementById('audio');
-    const playBtn = document.getElementById('playBtn');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const videoBtn = document.getElementById('videoBtn');
-    const playlistToggle = document.getElementById('playlistToggle');
-    const playlistPopup = document.getElementById('playlistPopup');
-    const playlist = document.getElementById('playlist');
-    const progress = document.getElementById('progress');
-    const currentTimeEl = document.getElementById('currentTime');
-    const durationEl = document.getElementById('duration');
-    const volume = document.getElementById('volume');
-    const screen = document.getElementById('screen');
-    const trackTitle = document.getElementById('trackTitle');
-    const closeBtn = document.getElementById('closeBtn');
+  <div class="screen" id="screen">
+    <img src="https://via.placeholder.com/420x200.png?text=Cover" alt="Album Art">
+  </div>
 
-    // Playlist with public URLs
-    const tracks = [
-      { name: "Song 1", url: "https://drive.google.com/uc?export=download&id=1XrykUyaIuv6lwqNRYBzWOGxVbX320pCZ", cover: "https://via.placeholder.com/420x200.png?text=Cover+1" },
-      { name: "Song 2", url: "https://drive.google.com/uc?export=download&id=YOUR_FILE_ID2", cover: "https://via.placeholder.com/420x200.png?text=Cover+2" }
-    ];
+  <div class="controls">
+    <button id="prevBtn">⏮</button>
+    <button id="playBtn">▶</button>
+    <button id="nextBtn">⏭</button>
+    <button id="videoBtn">📺</button>
+    <button id="playlistToggle">🎶</button>
+  </div>
 
-    const videos = [
-      "https://drive.google.com/uc?export=download&id=YOUR_VIDEO_ID1",
-      "https://drive.google.com/uc?export=download&id=YOUR_VIDEO_ID2"
-    ];
+  <div class="track-title" id="trackTitle">Loading...</div>
 
-    let currentIndex = 0;
-    let currentVideoIndex = 0;
-    let isPlaying = false;
+  <div class="progress-container">
+    <span id="currentTime">0:00</span>
+    <input type="range" id="progress" class="progress" value="0" min="0" max="100">
+    <span id="duration">0:00</span>
+  </div>
 
-    function renderPlaylist() {
-      playlist.innerHTML = '';
-      tracks.forEach((track, i) => {
-        const li = document.createElement('li');
-        li.textContent = track.name;
-        if (i === currentIndex) li.classList.add('active');
-        li.onclick = () => {
-          loadTrack(i);
-          togglePlaylist(false);
-        };
-        playlist.appendChild(li);
-      });
-    }
+  <div class="volume-container">
+    <label for="volume">🔊</label>
+    <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
+  </div>
 
-    function loadTrack(index) {
-      currentIndex = index;
-      audio.src = tracks[index].url;
-      trackTitle.textContent = tracks[index].name;
-      screen.innerHTML = `<img src="${tracks[index].cover}" alt="Cover">`;
-      audio.play();
-      isPlaying = true;
-      playBtn.textContent = "⏸";
-      renderPlaylist();
-    }
+  <div class="waveform" id="waveform">
+    ${Array(21).fill('<div class="bar"></div>').join('')}
+  </div>
 
-    function togglePlay() {
-      if (isPlaying) {
-        audio.pause();
-        playBtn.textContent = "▶";
-      } else {
-        audio.play();
-        playBtn.textContent = "⏸";
-      }
-      isPlaying = !isPlaying;
-    }
+  <div class="playlist-popup" id="playlistPopup">
+    <ul id="playlist"></ul>
+  </div>
 
-    function prevTrack() {
-      currentIndex = (currentIndex - 1 + tracks.length) % tracks.length;
-      loadTrack(currentIndex);
-    }
+  <audio id="audio"></audio>
+</div>
 
-    function nextTrack() {
-      currentIndex = (currentIndex + 1) % tracks.length;
-      loadTrack(currentIndex);
-    }
+<script>
+const audio = document.getElementById('audio');
+const playBtn = document.getElementById('playBtn');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const videoBtn = document.getElementById('videoBtn');
+const playlistToggle = document.getElementById('playlistToggle');
+const playlistPopup = document.getElementById('playlistPopup');
+const playlist = document.getElementById('playlist');
+const progress = document.getElementById('progress');
+const currentTimeEl = document.getElementById('currentTime');
+const durationEl = document.getElementById('duration');
+const volume = document.getElementById('volume');
+const screen = document.getElementById('screen');
+const trackTitle = document.getElementById('trackTitle');
+const closeBtn = document.getElementById('closeBtn');
 
-    function changeVideo() {
-      currentVideoIndex = (currentVideoIndex + 1) % videos.length;
-      screen.innerHTML = `<video src="${videos[currentVideoIndex]}" autoplay loop muted></video>`;
-    }
+// 🎵 Google Drive URLs (replace YOUR_FILE_ID with actual IDs)
+const tracks = [
+  { name: "Song 1", url: "https://drive.google.com/uc?export=download&id=1XrykUyaIuv6lwqNRYBzWOGxVbX320pCZ", cover: "https://via.placeholder.com/420x200.png?text=Cover+1" },
+  { name: "Song 2", url: "https://drive.google.com/uc?export=download&id=YOUR_MP3_FILE_ID2", cover: "https://via.placeholder.com/420x200.png?text=Cover+2" }
+];
 
-    function updateProgress() {
-      if (audio.duration) {
-        progress.value = (audio.currentTime / audio.duration) * 100;
-        currentTimeEl.textContent = formatTime(audio.currentTime);
-        durationEl.textContent = formatTime(audio.duration);
-      }
-    }
+const videos = [
+  "https://drive.google.com/uc?export=download&id=YOUR_MP4_FILE_ID1",
+  "https://drive.google.com/uc?export=download&id=YOUR_MP4_FILE_ID2"
+];
 
-    function formatTime(seconds) {
-      const mins = Math.floor(seconds / 60);
-      const secs = Math.floor(seconds % 60);
-      return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-    }
+let currentIndex = 0;
+let currentVideoIndex = 0;
+let isPlaying = false;
 
-    progress.addEventListener('input', () => {
-      audio.currentTime = (progress.value / 100) * audio.duration;
-    });
+function renderPlaylist() {
+  playlist.innerHTML = '';
+  tracks.forEach((track, i) => {
+    const li = document.createElement('li');
+    li.textContent = track.name;
+    if (i === currentIndex) li.classList.add('active');
+    li.onclick = () => { loadTrack(i); togglePlaylist(false); };
+    playlist.appendChild(li);
+  });
+}
 
-    volume.addEventListener('input', () => {
-      audio.volume = volume.value;
-    });
+function loadTrack(index) {
+  currentIndex = index;
+  audio.src = tracks[index].url;
+  trackTitle.textContent = tracks[index].name;
+  screen.innerHTML = `<img src="${tracks[index].cover}" alt="Cover">`;
+  audio.play();
+  isPlaying = true;
+  playBtn.textContent = "⏸";
+  renderPlaylist();
+}
 
-    audio.addEventListener('timeupdate', updateProgress);
-    audio.addEventListener('ended', nextTrack);
+function togglePlay() {
+  if (isPlaying) { audio.pause(); playBtn.textContent = "▶"; }
+  else { audio.play(); playBtn.textContent = "⏸"; }
+  isPlaying = !isPlaying;
+}
 
-    playBtn.addEventListener('click', togglePlay);
-    prevBtn.addEventListener('click', prevTrack);
-    nextBtn.addEventListener('click', nextTrack);
-    videoBtn.addEventListener('click', changeVideo);
-    playlistToggle.addEventListener('click', () => togglePlaylist());
+function prevTrack() {
+  currentIndex = (currentIndex - 1 + tracks.length) % tracks.length;
+  loadTrack(currentIndex);
+}
 
-    closeBtn.addEventListener('click', () => playlistPopup.style.display = 'none');
+function nextTrack() {
+  currentIndex = (currentIndex + 1) % tracks.length;
+  loadTrack(currentIndex);
+}
 
-    function togglePlaylist(forceClose = null) {
-      if (forceClose === false) {
-        playlistPopup.style.display = "none";
-      } else {
-        playlistPopup.style.display = playlistPopup.style.display === "block" ? "none" : "block";
-      }
-    }
+function changeVideo() {
+  currentVideoIndex = (currentVideoIndex + 1) % videos.length;
+  screen.innerHTML = `<video src="${videos[currentVideoIndex]}" autoplay loop muted></video>`;
+}
 
-    // Initialize
-    renderPlaylist();
-    loadTrack(0);
-    changeVideo();
-  </script>
+function updateProgress() {
+  if (audio.duration) {
+    progress.value = (audio.currentTime / audio.duration) * 100;
+    currentTimeEl.textContent = formatTime(audio.currentTime);
+    durationEl.textContent = formatTime(audio.duration);
+  }
+}
+
+function formatTime(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+}
+
+progress.addEventListener('input', () => {
+  audio.currentTime = (progress.value / 100) * audio.duration;
+});
+
+volume.addEventListener('input', () => {
+  audio.volume = volume.value;
+});
+
+audio.addEventListener('timeupdate', updateProgress);
+audio.addEventListener('ended', nextTrack);
+
+playBtn.addEventListener('click', togglePlay);
+prevBtn.addEventListener('click', prevTrack);
+nextBtn.addEventListener('click', nextTrack);
+videoBtn.addEventListener('click', changeVideo);
+playlistToggle.addEventListener('click', () => togglePlaylist());
+
+closeBtn.addEventListener('click', () => playlistPopup.style.display = 'none');
+
+function togglePlaylist(forceClose = null) {
+  if (forceClose === false) playlistPopup.style.display = "none";
+  else playlistPopup.style.display = playlistPopup.style.display === "block" ? "none" : "block";
+}
+
+// Initialize
+renderPlaylist();
+loadTrack(0);
+changeVideo();
+</script>
+
 </body>
 </html>
