@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Record Player Playlist Widget</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background: #1c1c1c;
+      color: white;
+      font-family: sans-serif;
+    }
+
+    .record {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #000 60%, #222 100%);
+      border: 8px solid #111;
+      position: relative;
+      animation: spin 4s linear infinite;
+      animation-play-state: paused;
+    }
+
+    .record::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 40px;
+      height: 40px;
+      background: #c00;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      background: #c00;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #a00;
+    }
+
+    input {
+      margin-top: 15px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+      width: 220px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    li {
+      padding: 8px;
+      background: #333;
+      margin-bottom: 5px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    li:hover {
+      background: #444;
+    }
+
+    li.active {
+      background: #c00;
+    }
+  </style>
+</head>
+<body>
+  <div class="record" id="record"></div>
+
+  <button id="playBtn">Play</button>
+  <input type="file" id="fileInput" accept="audio/mp3" multiple />
+
+  <ul id="playlist"></ul>
+
+  <audio id="audio"></audio>
+
+  <script>
+    const record = document.getElementById('record');
+    const playBtn = document.getElementById('playBtn');
+    const fileInput = document.getElementById('fileInput');
+    const audio = document.getElementById('audio');
+    const playlist = document.getElementById('playlist');
+
+    let isPlaying = false;
+    let tracks = [];
+    let currentIndex = -1;
+
+    playBtn.addEventListener('click', () => {
+      if (currentIndex === -1 && tracks.length > 0) {
+        loadTrack(0); // auto-load first track
+      }
+
+      if (isPlaying) {
+        audio.pause();
+        record.style.animationPlayState = 'paused';
+        playBtn.textContent = 'Play';
+      } else {
+        audio.play();
+        record.style.animationPlayState = 'running';
+        playBtn.textContent = 'Pause';
+      }
+      isPlaying = !isPlaying;
+    });
+
+    fileInput.addEventListener('change', (event) => {
+      const files = Array.from(event.target.files);
+      tracks = files.map(file => ({
+        name: file.name,
+        url: URL.createObjectURL(file)
+      }));
+      renderPlaylist();
+    });
+
+    function renderPlaylist() {
+      playlist.innerHTML = '';
+      tracks.forEach((track, index) => {
+        const li = document.createElement('li');
+        li.textContent = track.name;
+        li.addEventListener('click', () => loadTrack(index));
+        if (index === currentIndex) li.classList.add('active');
+        playlist.appendChild(li);
+      });
+    }
+
+    function loadTrack(index) {
+      currentIndex = index;
+      audio.src = tracks[index].url;
+      audio.play();
+      record.style.animationPlayState = 'running';
+      playBtn.textContent = 'Pause';
+      isPlaying = true;
+      renderPlaylist();
+    }
+
+    audio.addEventListener('ended', () => {
+      if (currentIndex < tracks.length - 1) {
+        loadTrack(currentIndex + 1); // autoplay next
+      } else {
+        record.style.animationPlayState = 'paused';
+        playBtn.textContent = 'Play';
+        isPlaying = false;
+      }
+    });
+  </script>
+</body>
+</html>
