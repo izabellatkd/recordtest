@@ -100,7 +100,7 @@ input[type="range"] {
   appearance: none;
   height: 6px;
   border-radius: 3px;
-  background: #7B7B7B; /* dark grey */
+  background: #7B7B7B;
   outline: none;
   cursor: pointer;
   flex: 1;
@@ -126,8 +126,9 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer;
 }
 
+/* Volume slider */
 .volume-container input[type="range"] {
-  width: 80px; /* shorter slider */
+  width: 80px;
   margin-left: 5px;
 }
 
@@ -145,7 +146,7 @@ input[type="range"]::-moz-range-thumb {
 .bar {
   width: 4px;
   margin: 0 2px;
-  background: #7B7B7B; /* dark grey */
+  background: #7B7B7B;
   height: 10px;
   animation: bounce 2s infinite ease-in-out;
   animation-play-state: paused;
@@ -240,7 +241,9 @@ input[type="range"]::-moz-range-thumb {
     <button id="prevBtn">⏮</button>
     <button id="playBtn">▶</button>
     <button id="nextBtn">⏭</button>
-    <button id="videoBtn">📺</button>
+    <button id="videoBtn">[ ▸ ]</button>
+    <button id="shuffleBtn">⇄</button>
+    <button id="repeatBtn">↻</button>
     <button id="playlistToggle">🎶</button>
   </div>
 
@@ -263,7 +266,7 @@ input[type="range"]::-moz-range-thumb {
   </div>
 
   <div class="volume-container">
-    <label for="volume">🔊</label>
+    <label for="volume">Volume: ▁▂▃▄▅▆▇</label>
     <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
   </div>
 
@@ -284,6 +287,8 @@ const playBtn = document.getElementById('playBtn');
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
 const videoBtn = document.getElementById('videoBtn');
+const shuffleBtn = document.getElementById('shuffleBtn');
+const repeatBtn = document.getElementById('repeatBtn');
 const playlistToggle = document.getElementById('playlistToggle');
 const playlistPopup = document.getElementById('playlistPopup');
 const playlistClose = document.getElementById('playlistClose');
@@ -312,43 +317,57 @@ const videos = [
 let currentVideoIndex = 0;
 let currentIndex = 0;
 let isPlaying = false;
+let isShuffle = false;
+let repeatMode = 0; // 0 = no repeat, 1 = repeat playlist, 2 = repeat single track
 
-function renderPlaylist() {
-  playlist.innerHTML = '';
-  tracks.forEach((track, i) => {
-    const li = document.createElement('li');
-    li.textContent = track.name;
-    if(i === currentIndex) li.classList.add('active');
-    li.onclick = () => { loadTrack(i); togglePlaylist(false); };
+// Playlist rendering
+function renderPlaylist(){
+  playlist.innerHTML='';
+  tracks.forEach((track,i)=>{
+    const li=document.createElement('li');
+    li.textContent=track.name;
+    if(i===currentIndex) li.classList.add('active');
+    li.onclick=()=>{loadTrack(i); togglePlaylist(false);}
     playlist.appendChild(li);
   });
 }
 
-function loadTrack(index) {
-  currentIndex = index;
-  audio.src = tracks[index].url;
-  trackTitle.textContent = tracks[index].name;
-  screen.innerHTML = `<img src="${tracks[index].cover}" alt="Cover">`;
+function loadTrack(index){
+  currentIndex=index;
+  audio.src=tracks[index].url;
+  trackTitle.textContent=tracks[index].name;
+  screen.innerHTML=`<img src="${tracks[index].cover}" alt="Cover">`;
   audio.play();
-  isPlaying = true;
-  playBtn.textContent = "⏸";
+  isPlaying=true;
+  playBtn.textContent="⏸";
   setWaveform(true);
   renderPlaylist();
 }
 
-function togglePlay() {
-  if(isPlaying){ audio.pause(); playBtn.textContent="▶"; setWaveform(false); }
-  else{ audio.play(); playBtn.textContent="⏸"; setWaveform(true); }
-  isPlaying = !isPlaying;
+function togglePlay(){
+  if(isPlaying){ audio.pause(); playBtn.textContent="▶"; setWaveform(false);}
+  else{ audio.play(); playBtn.textContent="⏸"; setWaveform(true);}
+  isPlaying=!isPlaying;
 }
 
 function prevTrack(){ loadTrack((currentIndex-1+tracks.length)%tracks.length); }
-function nextTrack(){ loadTrack((currentIndex+1)%tracks.length); }
-
-function changeVideo(){
-  currentVideoIndex=(currentVideoIndex+1)%videos.length;
-  screen.innerHTML=`<video src="${videos[currentVideoIndex]}" autoplay loop muted></video>`;
+function nextTrack(){
+  if(isShuffle){
+    let nextIndex;
+    do{ nextIndex=Math.floor(Math.random()*tracks.length); } 
+    while(nextIndex===currentIndex && tracks.length>1);
+    loadTrack(nextIndex);
+  } else {
+    if(repeatMode===2){ loadTrack(currentIndex); }
+    else{
+      currentIndex=(currentIndex+1)%tracks.length;
+      if(currentIndex===0 && repeatMode===0){ audio.pause(); playBtn.textContent="▶"; setWaveform(false);}
+      else loadTrack(currentIndex);
+    }
+  }
 }
+
+function changeVideo(){ currentVideoIndex=(currentVideoIndex+1)%videos.length; screen.innerHTML=`<video src="${videos[currentVideoIndex]}" autoplay loop muted></video>`; }
 
 function updateProgress(){
   if(audio.duration){
@@ -358,53 +377,36 @@ function updateProgress(){
   }
 }
 
-function formatTime(seconds){
-  const mins=Math.floor(seconds/60);
-  const secs=Math.floor(seconds%60);
-  return `${mins}:${secs<10?'0':''}${secs}`;
-}
+function formatTime(seconds){ const mins=Math.floor(seconds/60); const secs=Math.floor(seconds%60); return `${mins}:${secs<10?'0':''}${secs}`; }
 
-function setWaveform(state){ bars.forEach(bar => bar.style.animationPlayState = state?"running":"paused"); }
+progress.addEventListener('input',()=>{ audio.currentTime=(progress.value/100)*audio.duration; });
+volume.addEventListener('input',()=>{ audio.volume=volume.value; });
+audio.addEventListener('timeupdate',updateProgress);
+audio.addEventListener('ended',nextTrack);
 
-progress.addEventListener('input', ()=>{ audio.currentTime=(progress.value/100)*audio.duration; });
-volume.addEventListener('input', ()=>{ audio.volume=volume.value; });
-audio.addEventListener('timeupdate', updateProgress);
-audio.addEventListener('ended', nextTrack);
-
-playBtn.addEventListener('click', togglePlay);
-prevBtn.addEventListener('click', prevTrack);
-nextBtn.addEventListener('click', nextTrack);
-videoBtn.addEventListener('click', changeVideo);
-playlistToggle.addEventListener('click', ()=>togglePlaylist());
-
-playlistClose.addEventListener('click', ()=>playlistPopup.style.display="none");
+playBtn.addEventListener('click',togglePlay);
+prevBtn.addEventListener('click',prevTrack);
+nextBtn.addEventListener('click',nextTrack);
+videoBtn.addEventListener('click',changeVideo);
+shuffleBtn.addEventListener('click',()=>{ isShuffle=!isShuffle; shuffleBtn.style.background=isShuffle?"#b8e1e4":"#f9f0e9"; });
+repeatBtn.addEventListener('click',()=>{ repeatMode=(repeatMode+1)%3; repeatBtn.style.background=repeatMode===0?"#f9f0e9":"#b8e1e4"; });
+playlistToggle.addEventListener('click',()=>togglePlaylist());
+playlistClose.addEventListener('click',()=>togglePlaylist(false));
 
 function togglePlaylist(forceClose=null){
-  if(forceClose===false){ playlistPopup.style.display="none"; }
-  else{ playlistPopup.style.display = playlistPopup.style.display==="block"?"none":"block"; }
+  if(forceClose===false) playlistPopup.style.display="none";
+  else playlistPopup.style.display=playlistPopup.style.display==="block"?"none":"block";
 }
 
-// Make playlist draggable
-function makeDraggable(el){
-  let pos1=0,pos2=0,pos3=0,pos4=0;
-  const header = el.querySelector(".titlebar");
-  if(header) header.onmousedown=dragMouseDown;
-  function dragMouseDown(e){
-    e.preventDefault(); pos3=e.clientX; pos4=e.clientY;
-    document.onmouseup=closeDragElement;
-    document.onmousemove=elementDrag;
-  }
-  function elementDrag(e){
-    e.preventDefault();
-    pos1=pos3-e.clientX; pos2=pos4-e.clientY;
-    pos3=e.clientX; pos4=e.clientY;
-    el.style.top=(el.offsetTop-pos2)+"px";
-    el.style.left=(el.offsetLeft-pos1)+"px";
-  }
-  function closeDragElement(){ document.onmouseup=null; document.onmousemove=null; }
+// Waveform animation control
+function setWaveform(active){
+  bars.forEach(bar=>bar.style.animationPlayState=active?"running":"paused");
 }
 
-renderPlaylist(); loadTrack(0); changeVideo(); makeDraggable(playlistPopup);
+// Initialize
+renderPlaylist();
+loadTrack(0);
+changeVideo();
 </script>
 </body>
 </html>
