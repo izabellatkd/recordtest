@@ -17,7 +17,7 @@ body {
 
 .window {
   background: #f9f0e9;
-  border: 3px solid #ccc;
+  border: 3px solid #000;
   box-shadow: 6px 6px 0px #a2c6c8;
   width: 420px;
   display: flex;
@@ -36,10 +36,6 @@ body {
   cursor: move;
 }
 
-.titlebar span:first-child {
-  font-weight: bold;
-}
-
 .screen {
   background: #222;
   color: #fff;
@@ -47,12 +43,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 14px;
   position: relative;
-  overflow: hidden;
 }
 
-.screen video, 
-.screen img {
+.screen video, .screen img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -63,7 +58,7 @@ body {
   justify-content: center;
   align-items: center;
   padding: 10px;
-  background: #f9f0e9;
+  background: #ddd;
 }
 
 .controls button {
@@ -76,7 +71,7 @@ body {
   cursor: pointer;
 }
 
-#playBtn {
+.controls button#playBtn {
   background: #b8e1e4;
 }
 
@@ -84,44 +79,118 @@ body {
   text-align: center;
   font-size: 14px;
   padding: 6px;
-  background: #fff;
+  background: #fafafa;
   border-top: 1px solid #ccc;
   border-bottom: 1px solid #ccc;
 }
 
-.progress-container,
-.volume-container {
+.progress-container, .volume-container {
   display: flex;
   align-items: center;
   padding: 5px 10px;
-  background: #f9f0e9;
+  background: #eee;
+  gap: 8px;
 }
 
-.progress, #volume {
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: #7B7B7B;
+  outline: none;
+  cursor: pointer;
   flex: 1;
-  margin: 0 10px;
-  accent-color: #7B7B7B;
 }
 
-#volume {
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #b8e1e4;
+  border: 2px solid #666;
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #b8e1e4;
+  border: 2px solid #666;
+  cursor: pointer;
+}
+
+/* Volume slider */
+.volume-container input[type="range"] {
   width: 80px;
-  margin-left: 0;
+  margin-left: 5px;
 }
 
-/* Playlist Popup */
+/* Waveform */
+.waveform {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  height: 40px;
+  background: #f9f0e9;
+  border-bottom: 1px solid #ccc;
+  padding: 4px 0;
+}
+
+.bar {
+  width: 4px;
+  margin: 0 2px;
+  background: #7B7B7B;
+  height: 10px;
+  animation: bounce 2s infinite ease-in-out;
+  animation-play-state: paused;
+}
+
+/* 21 bars delays */
+.bar:nth-child(1){animation-delay:0s;}  .bar:nth-child(2){animation-delay:0.1s;}
+.bar:nth-child(3){animation-delay:0.2s;}  .bar:nth-child(4){animation-delay:0.3s;}
+.bar:nth-child(5){animation-delay:0.4s;}  .bar:nth-child(6){animation-delay:0.5s;}
+.bar:nth-child(7){animation-delay:0.6s;}  .bar:nth-child(8){animation-delay:0.7s;}
+.bar:nth-child(9){animation-delay:0.8s;}  .bar:nth-child(10){animation-delay:0.9s;}
+.bar:nth-child(11){animation-delay:1s;}   .bar:nth-child(12){animation-delay:1.1s;}
+.bar:nth-child(13){animation-delay:1.2s;} .bar:nth-child(14){animation-delay:1.3s;}
+.bar:nth-child(15){animation-delay:1.4s;} .bar:nth-child(16){animation-delay:1.5s;}
+.bar:nth-child(17){animation-delay:1.6s;} .bar:nth-child(18){animation-delay:1.7s;}
+.bar:nth-child(19){animation-delay:1.8s;} .bar:nth-child(20){animation-delay:1.9s;}
+.bar:nth-child(21){animation-delay:2s;}
+
+@keyframes bounce{
+  0%,100%{height:10px;}
+  50%{height:35px;}
+}
+
+/* Playlist popup */
 .playlist-popup {
   display: none;
   position: absolute;
-  top: 50px;
+  top: 60px;
   left: 50%;
   transform: translateX(-50%);
   width: 280px;
   max-height: 200px;
   overflow-y: auto;
-  border: 2px solid #ccc;
+  border: 2px solid #000;
   background: #f9f0e9;
-  box-shadow: 5px 5px 0px #a2c6c8;
+  box-shadow: 6px 6px 0px #a2c6c8;
   z-index: 100;
+}
+
+.playlist-popup .titlebar {
+  background: #b8e1e4;
+  color: #333;
+  padding: 4px 10px;
+  font-size: 13px;
+  cursor: move;
+  display: flex;
+  justify-content: space-between;
 }
 
 .playlist-popup ul {
@@ -144,41 +213,16 @@ body {
   background: #b8e1e4;
   color: #333;
 }
-
-/* Waveform */
-.waveform {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  height: 50px;
-  margin: 5px 10px;
-}
-
-.bar {
-  width: 4%;
-  background: #7B7B7B;
-  animation: wave 1.2s infinite;
-}
-
-.bar:nth-child(odd) { animation-delay: 0.2s; }
-.bar:nth-child(even) { animation-delay: 0.4s; }
-
-@keyframes wave {
-  0%, 100% { height: 10%; }
-  50% { height: 100%; }
-}
 </style>
-</head>
 <body>
-
-<div class="window" id="playerWindow">
-  <div class="titlebar" id="titlebar">
+<div class="window" id="mainWindow">
+  <div class="titlebar">
     <span>MP3 Player</span>
-    <span id="closeBtn">✖</span>
+    <span>▢ ✖</span>
   </div>
 
   <div class="screen" id="screen">
-    <img src="https://via.placeholder.com/420x200.png?text=Cover" alt="Album Art">
+    <img src="covers/cover1.jpg" alt="Album Art">
   </div>
 
   <div class="controls">
@@ -186,6 +230,8 @@ body {
     <button id="playBtn">▶</button>
     <button id="nextBtn">⏭</button>
     <button id="videoBtn">📺</button>
+    <button id="shuffleBtn">🔀</button>
+    <button id="repeatBtn">🔁</button>
     <button id="playlistToggle">🎶</button>
   </div>
 
@@ -197,16 +243,26 @@ body {
     <span id="duration">0:00</span>
   </div>
 
+  <div class="waveform" id="waveform">
+    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+  </div>
+
   <div class="volume-container">
     <label for="volume">🔊</label>
     <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
   </div>
 
-  <div class="waveform" id="waveform">
-    ${Array(21).fill('<div class="bar"></div>').join('')}
-  </div>
-
   <div class="playlist-popup" id="playlistPopup">
+    <div class="titlebar">
+      <span>Playlist</span>
+      <span id="playlistClose">✖</span>
+    </div>
     <ul id="playlist"></ul>
   </div>
 
@@ -219,8 +275,11 @@ const playBtn = document.getElementById('playBtn');
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
 const videoBtn = document.getElementById('videoBtn');
+const shuffleBtn = document.getElementById('shuffleBtn');
+const repeatBtn = document.getElementById('repeatBtn');
 const playlistToggle = document.getElementById('playlistToggle');
 const playlistPopup = document.getElementById('playlistPopup');
+const playlistClose = document.getElementById('playlistClose');
 const playlist = document.getElementById('playlist');
 const progress = document.getElementById('progress');
 const currentTimeEl = document.getElementById('currentTime');
@@ -228,109 +287,142 @@ const durationEl = document.getElementById('duration');
 const volume = document.getElementById('volume');
 const screen = document.getElementById('screen');
 const trackTitle = document.getElementById('trackTitle');
-const closeBtn = document.getElementById('closeBtn');
+const bars = document.querySelectorAll('.bar');
 
-// 🎵 Google Drive URLs (replace YOUR_FILE_ID with actual IDs)
 const tracks = [
-  { name: "Song 1", url: "https://drive.google.com/uc?export=download&id=1XrykUyaIuv6lwqNRYBzWOGxVbX320pCZ", cover: "https://via.placeholder.com/420x200.png?text=Cover+1" },
-  { name: "Song 2", url: "https://drive.google.com/uc?export=download&id=YOUR_MP3_FILE_ID2", cover: "https://via.placeholder.com/420x200.png?text=Cover+2" }
+  { name: "Sunset Drive", url: "https://www.dropbox.com/scl/fi/a1412dks32v1skve72joh/Nintendo-upbeat-chill-video-game-music-for-locking-in.mp3?rlkey=mhymnzv13zc0ikxiak21pw277&st=317jnzuk&dl=1", cover: "covers/cover1.jpg" },
+  { name: "Beach Vibes", url: "music/song2.mp3", cover: "covers/cover2.jpg" },
+  { name: "Late Night Pool", url: "music/song3.mp3", cover: "covers/cover3.jpg" },
+  { name: "Neon Nights", url: "music/song4.mp3", cover: "covers/cover4.jpg" }
 ];
 
 const videos = [
-  "https://drive.google.com/uc?export=download&id=YOUR_MP4_FILE_ID1",
-  "https://drive.google.com/uc?export=download&id=YOUR_MP4_FILE_ID2"
+  "videos/retro1.mp4",
+  "videos/retro2.mp4",
+  "videos/retro3.mp4"
 ];
 
-let currentIndex = 0;
 let currentVideoIndex = 0;
+let currentIndex = 0;
 let isPlaying = false;
+let isShuffle = false;
+let repeatMode = 0;
 
-function renderPlaylist() {
-  playlist.innerHTML = '';
-  tracks.forEach((track, i) => {
-    const li = document.createElement('li');
-    li.textContent = track.name;
-    if (i === currentIndex) li.classList.add('active');
-    li.onclick = () => { loadTrack(i); togglePlaylist(false); };
+// Playlist rendering
+function renderPlaylist(){
+  playlist.innerHTML='';
+  tracks.forEach((track,i)=>{
+    const li=document.createElement('li');
+    li.textContent=track.name;
+    if(i===currentIndex) li.classList.add('active');
+    li.onclick=()=>{loadTrack(i); togglePlaylist(false);}
     playlist.appendChild(li);
   });
 }
 
-function loadTrack(index) {
-  currentIndex = index;
-  audio.src = tracks[index].url;
-  trackTitle.textContent = tracks[index].name;
-  screen.innerHTML = `<img src="${tracks[index].cover}" alt="Cover">`;
+function loadTrack(index){
+  currentIndex=index;
+  audio.src=tracks[index].url;
+  trackTitle.textContent=tracks[index].name;
+  screen.innerHTML=`<img src="${tracks[index].cover}" alt="Cover">`;
   audio.play();
-  isPlaying = true;
-  playBtn.textContent = "⏸";
+  isPlaying=true;
+  playBtn.textContent="⏸";
+  setWaveform(true);
   renderPlaylist();
 }
 
-function togglePlay() {
-  if (isPlaying) { audio.pause(); playBtn.textContent = "▶"; }
-  else { audio.play(); playBtn.textContent = "⏸"; }
-  isPlaying = !isPlaying;
+function togglePlay(){
+  if(isPlaying){ audio.pause(); playBtn.textContent="▶"; setWaveform(false);}
+  else{ audio.play(); playBtn.textContent="⏸"; setWaveform(true);}
+  isPlaying=!isPlaying;
 }
 
-function prevTrack() {
-  currentIndex = (currentIndex - 1 + tracks.length) % tracks.length;
-  loadTrack(currentIndex);
+function prevTrack(){ loadTrack((currentIndex-1+tracks.length)%tracks.length); }
+
+function nextTrack(){
+  if(isShuffle){
+    let nextIndex;
+    do{ nextIndex=Math.floor(Math.random()*tracks.length); }
+    while(nextIndex===currentIndex && tracks.length>1);
+    loadTrack(nextIndex);
+  } else {
+    if(repeatMode===2){ loadTrack(currentIndex); }
+    else{
+      currentIndex=(currentIndex+1)%tracks.length;
+      if(currentIndex===0 && repeatMode===0){ audio.pause(); playBtn.textContent="▶"; setWaveform(false); }
+      else loadTrack(currentIndex);
+    }
+  }
 }
 
-function nextTrack() {
-  currentIndex = (currentIndex + 1) % tracks.length;
-  loadTrack(currentIndex);
-}
-
-function changeVideo() {
+// Cycle through videos on button click
+function changeVideo() { 
   currentVideoIndex = (currentVideoIndex + 1) % videos.length;
   screen.innerHTML = `<video src="${videos[currentVideoIndex]}" autoplay loop muted></video>`;
 }
 
-function updateProgress() {
-  if (audio.duration) {
-    progress.value = (audio.currentTime / audio.duration) * 100;
-    currentTimeEl.textContent = formatTime(audio.currentTime);
-    durationEl.textContent = formatTime(audio.duration);
+function updateProgress(){
+  if(audio.duration){
+    progress.value=(audio.currentTime/audio.duration)*100;
+    currentTimeEl.textContent=formatTime(audio.currentTime);
+    durationEl.textContent=formatTime(audio.duration);
   }
 }
 
-function formatTime(seconds) {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+function formatTime(seconds){ const mins=Math.floor(seconds/60); const secs=Math.floor(seconds%60); return `${mins}:${secs<10?'0':''}${secs}`; }
+
+progress.addEventListener('input',()=>{ audio.currentTime=(progress.value/100)*audio.duration; });
+volume.addEventListener('input',()=>{ audio.volume=volume.value; });
+audio.addEventListener('timeupdate',updateProgress);
+audio.addEventListener('ended',nextTrack);
+
+playBtn.addEventListener('click',togglePlay);
+prevBtn.addEventListener('click',prevTrack);
+nextBtn.addEventListener('click',nextTrack);
+videoBtn.addEventListener('click',changeVideo);
+shuffleBtn.addEventListener('click',()=>{ isShuffle=!isShuffle; shuffleBtn.style.background=isShuffle?"#b8e1e4":"#f9f0e9"; });
+repeatBtn.addEventListener('click',()=>{ repeatMode=(repeatMode+1)%3; repeatBtn.style.background=repeatMode===0?"#f9f0e9":"#b8e1e4"; });
+playlistToggle.addEventListener('click',()=>togglePlaylist());
+playlistClose.addEventListener('click',()=>togglePlaylist(false));
+
+function togglePlaylist(forceClose=null){
+  if(forceClose===false) playlistPopup.style.display="none";
+  else playlistPopup.style.display=playlistPopup.style.display==="block"?"none":"block";
 }
 
-progress.addEventListener('input', () => {
-  audio.currentTime = (progress.value / 100) * audio.duration;
-});
-
-volume.addEventListener('input', () => {
-  audio.volume = volume.value;
-});
-
-audio.addEventListener('timeupdate', updateProgress);
-audio.addEventListener('ended', nextTrack);
-
-playBtn.addEventListener('click', togglePlay);
-prevBtn.addEventListener('click', prevTrack);
-nextBtn.addEventListener('click', nextTrack);
-videoBtn.addEventListener('click', changeVideo);
-playlistToggle.addEventListener('click', () => togglePlaylist());
-
-closeBtn.addEventListener('click', () => playlistPopup.style.display = 'none');
-
-function togglePlaylist(forceClose = null) {
-  if (forceClose === false) playlistPopup.style.display = "none";
-  else playlistPopup.style.display = playlistPopup.style.display === "block" ? "none" : "block";
+// Waveform animation control
+function setWaveform(active){
+  bars.forEach(bar=>bar.style.animationPlayState=active?"running":"paused");
 }
+
+// Make playlist draggable
+const popupTitleBar = playlistPopup.querySelector('.titlebar');
+let isDragging = false;
+let offsetX, offsetY;
+
+popupTitleBar.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  const rect = playlistPopup.getBoundingClientRect();
+  offsetX = e.clientX - rect.left;
+  offsetY = e.clientY - rect.top;
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (isDragging) {
+    playlistPopup.style.left = `${e.clientX - offsetX}px`;
+    playlistPopup.style.top = `${e.clientY - offsetY}px`;
+  }
+});
+
+document.addEventListener('mouseup', () => {
+  isDragging = false;
+});
 
 // Initialize
 renderPlaylist();
 loadTrack(0);
 changeVideo();
 </script>
-
 </body>
 </html>
