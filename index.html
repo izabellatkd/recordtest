@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Record Player Playlist Widget</title>
+  <title>YouTube Record Player</title>
   <style>
     body {
       display: flex;
@@ -11,7 +11,6 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      margin: 0;
       background: #1c1c1c;
       color: white;
       font-family: sans-serif;
@@ -26,6 +25,7 @@
       position: relative;
       animation: spin 4s linear infinite;
       animation-play-state: paused;
+      margin-bottom: 20px;
     }
 
     .record::before {
@@ -44,130 +44,79 @@
       100% { transform: rotate(360deg); }
     }
 
-    button {
+    input {
       margin: 10px;
-      padding: 10px 20px;
+      padding: 8px;
+      width: 300px;
+      border-radius: 6px;
+      border: none;
+    }
+
+    button {
+      padding: 8px 16px;
       background: #c00;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       color: white;
       cursor: pointer;
-      font-size: 16px;
-      transition: background 0.3s;
+      margin-bottom: 20px;
     }
 
-    button:hover {
-      background: #a00;
-    }
-
-    input {
-      margin-top: 15px;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-      margin-top: 20px;
-      width: 220px;
-      max-height: 150px;
-      overflow-y: auto;
-    }
-
-    li {
-      padding: 8px;
-      background: #333;
-      margin-bottom: 5px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    li:hover {
-      background: #444;
-    }
-
-    li.active {
-      background: #c00;
+    #player {
+      width: 320px;
+      height: 180px;
+      border-radius: 12px;
+      overflow: hidden;
     }
   </style>
 </head>
 <body>
   <div class="record" id="record"></div>
 
-  <button id="playBtn">Play</button>
-  <input type="file" id="fileInput" accept="audio/mp3" multiple />
+  <input type="text" id="playlistInput" placeholder="PL6TJGJY76D9owMaWnjp5R-Zq_vubzxrQj&si=jkn9D5-yejRF_Irc" />
+  <button id="loadBtn">Load Playlist</button>
 
-  <ul id="playlist"></ul>
-
-  <audio id="audio"></audio>
+  <div id="player"></div>
 
   <script>
+    let player;
     const record = document.getElementById('record');
-    const playBtn = document.getElementById('playBtn');
-    const fileInput = document.getElementById('fileInput');
-    const audio = document.getElementById('audio');
-    const playlist = document.getElementById('playlist');
+    const loadBtn = document.getElementById('loadBtn');
+    const playlistInput = document.getElementById('playlistInput');
 
-    let isPlaying = false;
-    let tracks = [];
-    let currentIndex = -1;
+    // Load YouTube IFrame Player API
+    let tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    let firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-    playBtn.addEventListener('click', () => {
-      if (currentIndex === -1 && tracks.length > 0) {
-        loadTrack(0); // auto-load first track
-      }
-
-      if (isPlaying) {
-        audio.pause();
-        record.style.animationPlayState = 'paused';
-        playBtn.textContent = 'Play';
-      } else {
-        audio.play();
-        record.style.animationPlayState = 'running';
-        playBtn.textContent = 'Pause';
-      }
-      isPlaying = !isPlaying;
-    });
-
-    fileInput.addEventListener('change', (event) => {
-      const files = Array.from(event.target.files);
-      tracks = files.map(file => ({
-        name: file.name,
-        url: URL.createObjectURL(file)
-      }));
-      renderPlaylist();
-    });
-
-    function renderPlaylist() {
-      playlist.innerHTML = '';
-      tracks.forEach((track, index) => {
-        const li = document.createElement('li');
-        li.textContent = track.name;
-        li.addEventListener('click', () => loadTrack(index));
-        if (index === currentIndex) li.classList.add('active');
-        playlist.appendChild(li);
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        height: '180',
+        width: '320',
+        events: {
+          'onStateChange': onPlayerStateChange
+        }
       });
     }
 
-    function loadTrack(index) {
-      currentIndex = index;
-      audio.src = tracks[index].url;
-      audio.play();
-      record.style.animationPlayState = 'running';
-      playBtn.textContent = 'Pause';
-      isPlaying = true;
-      renderPlaylist();
-    }
-
-    audio.addEventListener('ended', () => {
-      if (currentIndex < tracks.length - 1) {
-        loadTrack(currentIndex + 1); // autoplay next
-      } else {
-        record.style.animationPlayState = 'paused';
-        playBtn.textContent = 'Play';
-        isPlaying = false;
+    loadBtn.addEventListener('click', () => {
+      const playlistId = playlistInput.value.trim();
+      if (playlistId) {
+        player.loadPlaylist({
+          listType: 'playlist',
+          list: playlistId
+        });
       }
     });
+
+    function onPlayerStateChange(event) {
+      if (event.data === YT.PlayerState.PLAYING) {
+        record.style.animationPlayState = 'running';
+      } else {
+        record.style.animationPlayState = 'paused';
+      }
+    }
   </script>
 </body>
 </html>
