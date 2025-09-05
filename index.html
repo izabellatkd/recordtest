@@ -1,6 +1,167 @@
-<p class="codepen" data-height="300" data-default-tab="css,result" data-slug-hash="QZKqOX" data-pen-title="Music Player | Audio Player 🎵" data-editable="true" data-user="singhimalaya" style="height: 300px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;">
-  <span>See the Pen <a href="https://codepen.io/singhimalaya/pen/QZKqOX">
-  Music Player | Audio Player 🎵</a> by Himalaya Singh (<a href="https://codepen.io/singhimalaya">@singhimalaya</a>)
-  on <a href="https://codepen.io">CodePen</a>.</span>
-</p>
-<script async src="https://public.codepenassets.com/embed/index.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poolsuite-Style Player</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #87ceeb, #ffb6c1);
+      font-family: "Courier New", monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .player {
+      background: #fefefe;
+      border: 3px solid #000;
+      padding: 20px;
+      width: 350px;
+      text-align: center;
+      box-shadow: 5px 5px 0px #000;
+    }
+
+    h1 {
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+
+    .record {
+      width: 150px;
+      height: 150px;
+      margin: 0 auto 15px auto;
+      border-radius: 50%;
+      background: radial-gradient(circle, #000 60%, #222 100%);
+      border: 6px solid #111;
+      animation: spin 4s linear infinite;
+      animation-play-state: paused;
+    }
+
+    .record::before {
+      content: '';
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: #ff69b4;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    button {
+      padding: 8px 16px;
+      margin: 5px;
+      background: #000;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 15px;
+      max-height: 100px;
+      overflow-y: auto;
+      font-size: 14px;
+      text-align: left;
+    }
+
+    li {
+      padding: 6px;
+      cursor: pointer;
+    }
+
+    li:hover {
+      background: #eee;
+    }
+
+    li.active {
+      background: #ff69b4;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="player">
+    <h1>🌴 Poolsuite Clone 🌴</h1>
+    <div class="record" id="record"></div>
+    <button id="playBtn">Play/Pause</button>
+    <ul id="playlist"></ul>
+    <audio id="audio"></audio>
+  </div>
+
+  <script>
+    const record = document.getElementById('record');
+    const playBtn = document.getElementById('playBtn');
+    const playlist = document.getElementById('playlist');
+    const audio = document.getElementById('audio');
+
+    // 🎵 Your custom music goes here:
+    const tracks = [
+      { name: "Sunset Drive", url: "music/song1.mp3" },
+      { name: "Beach Vibes", url: "music/song2.mp3" },
+      { name: "Late Night Pool", url: "music/song3.mp3" }
+    ];
+
+    let currentIndex = 0;
+    let isPlaying = false;
+
+    function renderPlaylist() {
+      playlist.innerHTML = '';
+      tracks.forEach((track, i) => {
+        const li = document.createElement('li');
+        li.textContent = track.name;
+        if (i === currentIndex) li.classList.add('active');
+        li.onclick = () => loadTrack(i);
+        playlist.appendChild(li);
+      });
+    }
+
+    function loadTrack(index) {
+      currentIndex = index;
+      audio.src = tracks[index].url;
+      audio.play();
+      isPlaying = true;
+      record.style.animationPlayState = 'running';
+      playBtn.textContent = "Pause";
+      renderPlaylist();
+    }
+
+    playBtn.onclick = () => {
+      if (!isPlaying) {
+        audio.play();
+        record.style.animationPlayState = 'running';
+        playBtn.textContent = "Pause";
+        isPlaying = true;
+      } else {
+        audio.pause();
+        record.style.animationPlayState = 'paused';
+        playBtn.textContent = "Play";
+        isPlaying = false;
+      }
+    };
+
+    audio.onended = () => {
+      if (currentIndex < tracks.length - 1) {
+        loadTrack(currentIndex + 1);
+      } else {
+        record.style.animationPlayState = 'paused';
+        playBtn.textContent = "Play";
+        isPlaying = false;
+      }
+    };
+
+    renderPlaylist();
+    loadTrack(0);
+  </script>
+</body>
+</html>
